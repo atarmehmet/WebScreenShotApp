@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  screenshotconsole:
+    image: ${DOCKER_REGISTRY-}screenshotconsole
+    build:
+      context: .
+      dockerfile: WebScreenShotApp\Dockerfile

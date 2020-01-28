@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "ScreenShotConsole": {
+      "commandName": "Project",
+      "commandLineArgs": "2 C:\\ScreenShot\\Input1.txt.txt"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
