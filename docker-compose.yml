@@ -6,3 +6,10 @@ services:
     build:
       context: .
       dockerfile: WebScreenShotApp\Dockerfile
+
+  screenshotservice:
+    image: ${DOCKER_REGISTRY-}screenshotservice
+    build:
+      context: .
+      dockerfile: ScreenShotService\Dockerfile
+
