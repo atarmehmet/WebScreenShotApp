@@ -1,10 +1,19 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
-#For more information, please see https://aka.ms/containercompat
-
 FROM mcr.microsoft.com/dotnet/core/runtime:3.1-nanoserver-1903 AS base
 WORKDIR /app
+
+FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8    
+RUN powershell -Command Add-WindowsFeature Web-WebSockets    
+RUN powershell -Command Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))    
+RUN powershell -Command choco install googlechrome -y
+RUN powershell -Command choco install firefox -y
+
+# choco chrome takes a bit
+RUN echo 'Downloading chocolatey...'
+SHELL ["powershell" , "-Command Install-PackageProvider -name chocolatey -Force"]
+SHELL ["powershell" , "-Command Set-PackageSource -Name chocolatey -Trusted"]
+SHELL ["powershell" , "-Command Get-PackageSource"]
+SHELL ["powershell" , "-Command Install-Package GoogleChrome -MinimumVersion 74"]
+# choco chrome takes a bit
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-nanoserver-1903 AS build
 WORKDIR /src
@@ -15,10 +24,8 @@ COPY . .
 WORKDIR "/src/ScreenShotService"
 RUN dotnet build "ScreenShotService.csproj" -c Release -o /app/build
 
-FROM build AS publish
-RUN dotnet publish "ScreenShotService.csproj" -c Release -o /app/publish
-
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/build .
+
 ENTRYPOINT ["dotnet", "ScreenShotService.dll"]

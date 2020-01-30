@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.6'
 
 services:
   screenshotconsole:
@@ -6,10 +6,17 @@ services:
     build:
       context: .
       dockerfile: WebScreenShotApp\Dockerfile
+    volumes:
+      - type: bind
+        source: C:/ScreenShot
+        target: C:/ScreenShot
 
   screenshotservice:
     image: ${DOCKER_REGISTRY-}screenshotservice
     build:
       context: .
       dockerfile: ScreenShotService\Dockerfile
-
+    volumes:
+      - type: bind
+        source: C:/ScreenShot
+        target: C:/ScreenShot
