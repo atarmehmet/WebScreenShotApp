@@ -25,7 +25,7 @@ Basically, there is a console application to communicate with service workers. T
   ```
  Capture screens from file which contains comma separated links and also named with `Input*.txt` pattern:
 ```bash
- 2 "C:/sometempfolder/Input1.txt" 
+ 2 "C:/ScreenShot/Input1.txt" 
 ```
 Retrieve captures by url and Download:
 ```bash
@@ -33,7 +33,7 @@ Retrieve captures by url and Download:
 ```
 Retrieve captures by file which contains comma separated links and also named with `Output*.txt` pattern:
 ```bash
- 4 "C:/sometempfolder/Output1.txt" 
+ 4 "C:/ScreenShot/Output1.txt" 
 ```
 
 - Retrieving can be made by giving two different inputs with comma separated values: date or site url.
@@ -44,9 +44,10 @@ Retrieve captures by file which contains comma separated links and also named wi
 
 ##### Running from Docker 
 After mapping local folders to virtual images, you can execute commands. 
-  In the `app.config` file of console application and in the appsettings.json file of Service application; we need to map InputFilesFolder and OutputFilesFolder parameters.
+  In the `app.config` file of console application and in the `appsettings.json` file of Service application; we need to map `C:/ScreenShot` folder to be able to see **InputFilesFolder** and **OutputFilesFolder** parameters.
 ```bash
- docker run -i screenshotconsole 2 "C:\ScreenShot\Input1.txt"
+ docker run -i -v c:\screenshot:c:\screenshot screenshotconsole 2 "C:/ScreenShot/Input1.txt"
+ #simply we bind c:\screenshot folder of our host system to image's folder
 ```
 
 ## Scalability
