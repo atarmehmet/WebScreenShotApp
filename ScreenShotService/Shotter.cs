@@ -4,6 +4,7 @@ using OpenQA.Selenium.Support.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace ScreenShotter
 {
@@ -20,7 +21,10 @@ namespace ScreenShotter
                             "log-level=3",
                             "headless", });
 
-            var driver = new ChromeDriver(options);
+            //var driver = new ChromeDriver(options);
+            Console.WriteLine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            ChromeDriver driver = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), options);
+
             _driver = driver;
         }
 

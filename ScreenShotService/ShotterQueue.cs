@@ -46,10 +46,9 @@ namespace ScreenShotService
         {
             foreach (var job in _jobs.GetConsumingEnumerable(CancellationToken.None))
             {
-                Console.WriteLine(job);
-
                 if (job.StartsWith("http://www") || job.StartsWith("https://www"))
                 {
+                    _logger.LogInformation("Processing job: " + job);
                     Shotter shotter = new Shotter(_windowSize);
 
                     ScreenShotSaver ssSaver = new ScreenShotSaver(_dbConfig[0], _dbConfig[1], _dbConfig[2]);
@@ -63,13 +62,16 @@ namespace ScreenShotService
                             ContentImage = shotter.TakeScreenshot(job)
                         };
                         ssSaver.Create(ssData);
+                        _logger.LogInformation("Successfully imported job: " + job);
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex.Message);
                     }
-
-                    shotter.Dispose();
+                    finally
+                    {
+                        shotter.Dispose();
+                    }
                 }
             }
         }

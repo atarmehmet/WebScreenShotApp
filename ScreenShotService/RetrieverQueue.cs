@@ -52,7 +52,7 @@ namespace ScreenShotService
         {
             foreach (var rJob in _jobs.GetConsumingEnumerable(CancellationToken.None))
             {
-                Console.WriteLine(rJob.job);
+                _logger.LogInformation("Processing job: " + rJob.job);
 
                 ScreenShotSaver ssSaver = new ScreenShotSaver(_dbConfig[0], _dbConfig[1], _dbConfig[2]);
                 IOUtil ioUtil = new IOUtil();

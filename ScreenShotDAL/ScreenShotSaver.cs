@@ -8,9 +8,10 @@ namespace ScreenShotDAL
     public class ScreenShotSaver
     {
         private readonly IMongoCollection<ScreenShotData> _screens;
+
         public ScreenShotSaver(string ConnectionString, string Database, string Collection)
         {
-            var dbClient = new MongoClient(ConnectionString);
+            MongoClient dbClient = new MongoClient(ConnectionString);
             IMongoDatabase db = dbClient.GetDatabase(Database);
             _screens = db.GetCollection<ScreenShotData>(Collection);
         }

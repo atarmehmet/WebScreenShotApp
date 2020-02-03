@@ -1,16 +1,6 @@
 version: '3.6'
 
 services:
-  screenshotconsole:
-    image: ${DOCKER_REGISTRY-}screenshotconsole
-    build:
-      context: .
-      dockerfile: WebScreenShotApp\Dockerfile
-    volumes:
-      - type: bind
-        source: C:/ScreenShot
-        target: C:/ScreenShot
-
   screenshotservice:
     image: ${DOCKER_REGISTRY-}screenshotservice
     build:
@@ -20,3 +10,26 @@ services:
       - type: bind
         source: C:/ScreenShot
         target: C:/ScreenShot
+    depends_on:
+      - mongodb
+  screenshotconsole:
+    image: ${DOCKER_REGISTRY-}screenshotconsole
+    build:
+      context: .
+      dockerfile: WebScreenShotApp\Dockerfile
+    volumes:
+      - type: bind
+        source: C:/ScreenShot
+        target: C:/ScreenShot
+  mongodb:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    container_name: "mongodb"
+    ports:
+      - 27017:27017
+    volumes:
+      - c:/data/db:c:/data/db
+      - c:/data/configdb:c:/data/configdb

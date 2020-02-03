@@ -1,21 +1,46 @@
-FROM mcr.microsoft.com/dotnet/core/runtime:3.1-nanoserver-1903 AS base
+FROM mcr.microsoft.com/windows/servercore:1803 AS base
+# Install .NET Core Runtime
+USER ContainerAdministrator
+RUN powershell -Command \
+        $ProgressPreference = 'SilentlyContinue'; \
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; \ 
+        Invoke-WebRequest \
+            -UseBasicParsing \
+            -Uri https://dot.net/v1/dotnet-install.ps1 \
+            -OutFile dotnet-install.ps1; \
+        ./dotnet-install.ps1 \
+            -InstallDir '/Program Files/dotnet' \
+            -Channel 3.1 \
+            -Runtime dotnet; \
+        Remove-Item -Force dotnet-install.ps1 \
+    && setx /M PATH "%PATH%;C:\Program Files\dotnet"
+
 WORKDIR /app
+RUN powershell -Command \
+        $ProgressPreference = 'SilentlyContinue'; \
+        Invoke-WebRequest \
+            -UseBasicParsing \
+            -Uri http://dl.google.com/chrome/install/latest/chrome_installer.exe \
+            -OutFile chrome_installer.exe 
+RUN ["c:/app/chrome_installer.exe", "/silent", "/install"]
+USER ContainerUser
 
-FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8    
-RUN powershell -Command Add-WindowsFeature Web-WebSockets    
-RUN powershell -Command Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))    
-RUN powershell -Command choco install googlechrome -y
-RUN powershell -Command choco install firefox -y
+FROM mcr.microsoft.com/windows/servercore:1803 AS build
 
-# choco chrome takes a bit
-RUN echo 'Downloading chocolatey...'
-SHELL ["powershell" , "-Command Install-PackageProvider -name chocolatey -Force"]
-SHELL ["powershell" , "-Command Set-PackageSource -Name chocolatey -Trusted"]
-SHELL ["powershell" , "-Command Get-PackageSource"]
-SHELL ["powershell" , "-Command Install-Package GoogleChrome -MinimumVersion 74"]
-# choco chrome takes a bit
+# Install .NET Core SDK
+RUN powershell -Command \
+        $ProgressPreference = 'SilentlyContinue'; \
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; \ 
+        Invoke-WebRequest \
+            -UseBasicParsing \
+            -Uri https://dot.net/v1/dotnet-install.ps1 \
+            -OutFile dotnet-install.ps1; \
+        ./dotnet-install.ps1 \
+            -InstallDir '/Program Files/dotnet' \
+            -Channel 3.1; \
+        Remove-Item -Force dotnet-install.ps1 \
+    && setx /M PATH "%PATH%;C:\Program Files\dotnet"
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-nanoserver-1903 AS build
 WORKDIR /src
 COPY ["ScreenShotService/ScreenShotService.csproj", "ScreenShotService/"]
 COPY ["ScreenShotDAL/ScreenShotDAL.csproj", "ScreenShotDAL/"]
@@ -24,8 +49,10 @@ COPY . .
 WORKDIR "/src/ScreenShotService"
 RUN dotnet build "ScreenShotService.csproj" -c Release -o /app/build
 
+FROM build AS publish
+RUN dotnet publish "ScreenShotService.csproj" -c Release -o /app/publish
+
 FROM base AS final
 WORKDIR /app
-COPY --from=build /app/build .
-
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "ScreenShotService.dll"]

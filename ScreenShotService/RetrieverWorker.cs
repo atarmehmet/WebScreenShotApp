@@ -41,7 +41,8 @@ namespace ScreenShotService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                if (DateTime.Now.Second == 0)
+                    _logger.LogInformation("RetrieverWorker running at: {time}", DateTimeOffset.Now);
                 try
                 {
                     RetrieverQueue rq = new RetrieverQueue(threadCount, dbConfig, _logger, imagesDirectory);
